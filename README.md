@@ -14,20 +14,34 @@ $ cargo install --git https://github.com/shrhdk/monochrome
 $ monochrome <algorithm> <input> <output> --gamma <gamma>
 ```
 
+## Algorithm
+
+| Option Value | Name                                               |
+| ------------ | -------------------------------------------------- |
+| `floyd`      | Floyd-Steinberg Dithering                          |
+| `floyd2`     | Floyd-Steinberg Dithering with Serpentine Scanning |
+| `bayer`      | Bayer dithering (4x4 mask)                         |
+
 ## Example
 
 ```sh
 $ monochrome floyd lena.jpg floyd.png
+$ monochrome floyd2 lena.jpg floydw.png
 $ monochrome bayer lena.jpg bayer.png
 $ monochrome bayer lena.jpg bayer.png --gamma 0.5
 ```
 
 ### Original
+
 ![Original Lena](img/lena.jpg)
 
 ### Floyd-Steinberg Dithering
 
 ![Image dithered by Floyd-Steinberg method](img/floyd.png)
+
+### Floyd-Steinberg Dithering with Serpentine Scanning
+
+![Image dithered by Floyd-Steinberg method with Serpentine Scanning](img/floyd2.png)
 
 ### Bayer Dithering
 
