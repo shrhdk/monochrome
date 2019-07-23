@@ -2,7 +2,7 @@ extern crate clap;
 extern crate image;
 
 use clap::{App, Arg};
-use image::{ImageBuffer, Luma};
+use image::{GrayImage, ImageBuffer, Luma};
 
 fn main() {
     let app = App::new("monochrome")
@@ -19,6 +19,13 @@ fn main() {
             Arg::with_name("out")
                 .help("Output file path")
                 .required(true),
+        )
+        .arg(
+            Arg::with_name("gamma")
+                .help("Gamma correction value")
+                .short("g")
+                .long("gamma")
+                .takes_value(true),
         );
 
     let matches = app.get_matches();
@@ -26,6 +33,7 @@ fn main() {
     let algorithm = matches.value_of("algorithm").unwrap();
     let in_path = matches.value_of("in").unwrap();
     let out_path = matches.value_of("out").unwrap();
+    let gamma = clap::value_t!(matches.value_of("gamma"), f64).unwrap_or(1.0);
 
     let gray = match image::open(in_path) {
         Ok(img) => img.to_luma(),
@@ -33,6 +41,13 @@ fn main() {
             eprintln!("Failed to read input image : {}", e);
             return;
         }
+    };
+
+    let gray = if (gamma - 1.0).abs() < 0.001 {
+        gray
+    } else {
+        let gamma_lut = create_gamma_lut(gamma);
+        apply_lut(gray, &gamma_lut)
     };
 
     let mono = match algorithm {
@@ -47,6 +62,32 @@ fn main() {
     if let Err(e) = mono.save(out_path) {
         eprintln!("Failed to save output image : {}", e);
     }
+}
+
+fn create_gamma_lut(gamma: f64) -> [u8; 256] {
+    let mut lut = [0u8; 256];
+    for x in 0..=255u8 {
+        lut[x as usize] = (255.0 * (f64::from(x) / 255.0).powf(1.0 / gamma)) as u8;
+    }
+    lut
+}
+
+fn apply_lut(
+    src: ImageBuffer<Luma<u8>, Vec<u8>>,
+    lut: &[u8; 256],
+) -> ImageBuffer<Luma<u8>, Vec<u8>> {
+    let (width, height) = (src.width(), src.height());
+    let mut dst = GrayImage::new(width, height);
+
+    for i in 0..height {
+        for j in 0..width {
+            let x = src.get_pixel(j, i)[0];
+            let y = lut[x as usize];
+            dst.put_pixel(j, i, Luma([y]));
+        }
+    }
+
+    dst
 }
 
 const FLOYD_STEINBERG_THRESHOLD: u8 = 127;
