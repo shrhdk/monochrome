@@ -6,10 +6,8 @@ const FLOYD_STEINBERG_THRESHOLD: u8 = 127;
 
 pub fn dither(gray: &GrayImage) -> GrayImage {
     let mut mono = (*gray).clone();
-    let (width, height) = (mono.width(), mono.height());
-
-    for i in 0..height {
-        for j in 0..width {
+    for i in 0..mono.height() {
+        for j in 0..mono.width() {
             // +----+----+----+
             // |    |  * | f1 |
             // +----+----+----+
@@ -23,17 +21,14 @@ pub fn dither(gray: &GrayImage) -> GrayImage {
             update_neighboring_pixel(&mut mono, j + 1, i + 1, 1.0 / 16.0 * err); // f4
         }
     }
-
     mono
 }
 
 pub fn serpentine_scanning_dither(gray: &GrayImage) -> GrayImage {
     let mut mono = (*gray).clone();
-    let (width, height) = (mono.width(), mono.height());
-
-    for i in 0..height {
+    for i in 0..mono.height() {
         if i % 2 == 0 {
-            for j in 0..width {
+            for j in 0..mono.width() {
                 // +----+----+----+
                 // |    |  * | f1 |
                 // +----+----+----+
@@ -47,7 +42,7 @@ pub fn serpentine_scanning_dither(gray: &GrayImage) -> GrayImage {
                 update_neighboring_pixel(&mut mono, j + 1, i + 1, 1.0 / 16.0 * err); // f4
             }
         } else {
-            for j in (width - 1)..=0 {
+            for j in mono.width() - 1..=0 {
                 // +----+----+----+
                 // | f1 |  * |    |
                 // +----+----+----+
@@ -62,7 +57,6 @@ pub fn serpentine_scanning_dither(gray: &GrayImage) -> GrayImage {
             }
         }
     }
-
     mono
 }
 

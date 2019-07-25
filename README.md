@@ -1,6 +1,6 @@
 # monochrome
 
-Convert color images to monochrome images with several algorithms.
+Convert color images to monochrome images with several algorithm.
 
 ## Instalation
 
